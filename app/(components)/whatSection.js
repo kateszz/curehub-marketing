@@ -93,7 +93,7 @@ export default function WhatSection() {
 
     return (
       <section id="what" className="flex flex-col gap-0">
-        <div ref={firstRef} id="whatOne" className="h-[100vh] flex flex-col justify-center items-center ml-[15vw] gap-4"><span className="flex flex-col justify-start gap-4 max-md:pt-[10vh]"><h3 className="max-w-[20ch] ">No need for guessing.<br></br>The key to 10 more healthy years is in your DNA.</h3> <h5 className="max-w-[20ch]">We don't do vague reports or copy-paste plans based on a survey.</h5></span></div>
+        <div ref={firstRef} id="whatOne" className="h-[100vh] flex flex-col justify-center items-center ml-[15vw] gap-4"><span className="flex flex-col justify-start gap-4 max-md:pt-[10vh]"><h3 className="max-w-[20ch] ">No need for guessing.<br></br>The key to 10 more healthy years is in your DNA.</h3> <h5 className="max-w-[20ch]">We don&apos;t do vague reports or copy-paste plans based on a survey.</h5></span></div>
         <div ref={secondRef} id="whatTwo" className="h-[100vh] flex flex-row justify-center items-center ml-[15vw] gap-4"><h3 className="max-w-[20ch] max-md:pt-[10vh]">We analyse your genetic data to build your optimal supplement plan.</h3></div>
         <div ref={thirdRef} id="whatThree" className="h-[100vh] flex flex-col gap-12 justify-center items-center ml-[15vw]">
           <span className="flex flex-col justify-start gap-8 max-w-[60ch]">
