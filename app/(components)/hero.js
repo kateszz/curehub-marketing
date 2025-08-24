@@ -10,6 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero () {
     const heroRef = useRef();
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
     useGSAP(() => {
         const hero = heroRef.current;
         const heroElems = gsap.utils.toArray(heroRef.current.children);
@@ -25,6 +26,7 @@ export default function Hero () {
             scale: 0.1,
             delay: 1,
             scrollTrigger: {
+                id: 'heroscroll',
                 trigger: '#whatOne',
                 start: 'top bottom',
                 end: 'top top',
@@ -36,6 +38,8 @@ export default function Hero () {
         });
 
     },[]);
+
+
     return (
         <section ref={heroRef} id="hero" className=" realtive h-[100vh] flex flex-col justify-center items-center gap-10 max-sm:gap-12 px-4">
             <div className="absolute top-[-90] md:right-[-100] right-[-120] lg:right-[-50]">

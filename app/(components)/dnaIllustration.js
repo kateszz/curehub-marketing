@@ -20,27 +20,19 @@ const DnaIllustration = () => {
 
   useEffect(() => {
     const container = containerRef.current;
-    const dna = dnaRef.current;
+  //* const dna = dnaRef.current;
     const profile = profileRef.current;
     const labels = labelsRef.current;
     const isMobile = window.innerWidth <= 768;
 
-    if (!container || !dna || !profile || !labels) return;
+    if (!container || !profile || !labels) return;
     
     
     // Initial setup - hide profile and labels immediately
     gsap.set(profile, { opacity: 0, scale: 0.8, visibility: 'hidden' });
     gsap.set(labels.children, { opacity: 0, y: 20, scale: 0.8, visibility: 'hidden' });
 
-    // Continuous floating animation for DNA (default state)
-    const floatingTl = gsap.timeline({ repeat: -1, yoyo: true });
-    floatingTl.to(dna, {
-      y: -10,
-      rotation: 2,
-      duration: 3,
-      ease: "power2.inOut"
-    });
-    floatingTlRef.current = floatingTl;
+ 
 
     
 
@@ -53,7 +45,7 @@ const DnaIllustration = () => {
       end: "bottom 40%",
       onEnter: () => {
         gsap.set(container, { css: { zIndex: 1 } });
-        gsap.to(dna, { scale: 1.2 });
+       
        if (isMobile) { gsap.to(container,{y:100}) };
         gsap.set(profile, { visibility: 'visible' });
         gsap.to(profile, {
@@ -103,7 +95,7 @@ const DnaIllustration = () => {
       onEnter: () => {
         gsap.set(container, { css: { zIndex: 1 }});
         
-        gsap.to(dna, { scale: 1.2 });
+        
         gsap.set(labels.children, { visibility: 'visible' });
         gsap.to(labels.children, {
           opacity: 1,
@@ -169,9 +161,7 @@ const DnaIllustration = () => {
 
     // Cleanup function
     return () => {
-      if (floatingTlRef.current) {
-        floatingTlRef.current.kill();
-      }
+     
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
@@ -179,6 +169,7 @@ const DnaIllustration = () => {
   return (
     <div ref={containerRef} className="fixed top-1/2 lg:left-[6vw] left-[-5vw] -translate-y-1/2 max-md:top-[15vh] max-md:left-1/2 max-md:-translate-x-1/2  w-[40vw] max-w-[20rem] min-w-[45px] h-auto pointer-events-none">
       {/* DNA Illustration */}
+      {/* not wanted
       <div ref={dnaRef} className="relative w-full h-full">
         <img
           src="/helix-glass.png"
@@ -186,6 +177,7 @@ const DnaIllustration = () => {
           className="w-full h-full object-contain drop-shadow-lg max-md:rotate-90"
         />
       </div>
+  */}
 
       {/* Profile Icon Overlay (State 2) */}
       <div 

@@ -111,37 +111,24 @@ export default function HowSection() {
   return (
     <div>
     <div ref={containerRef} className="overflow-hidden">
-    <Image
-    src="/sequencing.png"
-    alt="sequencing top"
-    width="1677"
-    height="246"
-    className="seqImg fixed top-[15vh] w-[60vw] h-auto pointer-events-none z-20 hidden"
-  />
-  <Image
-    src="/sequencing.png"
-    alt="sequencing bottom"
-    width="1677"
-    height="246"
-    className="seqImg fixed bottom-[15vh] w-[60vw] h-auto pointer-events-none z-20 hidden"
-  />
+   
       <section id="how" className="flex flex-row gap-0 h-[100vh] w-fit overflow-clip">
         <div id="howOne" className="w-[100vw] mx-8 flex flex-col justify-center items-center">
-          <h3 className="max-w-[25ch]">This is how we go from your DNA to an actionable supplement plan.</h3>
+          <h3 className="max-w-[25ch] max-sm:max-w-[15ch]">This is how we go from your DNA to an actionable supplement plan.</h3>
         </div>
         <div id="howTwo" className="w-[100vw] flex flex-col justify-center items-center">
-          <span className="max-w-[80vw] flex flex-col justify-start gap-4">
+          <span className="max-w-[80vw] flex flex-col justify-start gap-4 max-sm:max-w-[25ch]">
             <h5>01</h5> <h6>You share your DNA report, we get your genotype.</h6>
             <h5>02</h5> <h6>Our engine decodes key SNPs and methylation pathways.</h6>
             <h5>03 </h5><h6>You get a personalised supplement plan and lifestyle protocol<br></br> — complete with exact dosages.</h6>
           </span>
         </div>
         <div id="howThree" className="w-[100vw] flex flex-col justify-center items-center">
-          <h3>Our process is fully scientific. And transparent.</h3>
+          <h3>Our process is fully scientific. <br /> And transparent.</h3>
         </div>
         <div id="howFour" className="w-[100vw] flex flex-col justify-center items-center relative">
-        <div className="absolute bottom-[10vh] right-[-5] opacity-70">
-                <Image src="helix-hor.svg" alt="Illustration of a DNA helix" width="300" height="76" className="w-200 h-auto"></Image>
+        <div className="absolute bottom-[10vh] right-[-5] max-sm:right-0 opacity-70">
+                <Image src="helix-hor.svg" alt="Illustration of a DNA helix" width="300" height="76" className="w-200 max-sm:w-50 h-auto"></Image>
             </div>
           <span className="max-w-[80vw] flex flex-col justify-start gap-4">
             <h5>THIS IS THE GIST OF THE SCIENCE:</h5>
