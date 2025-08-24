@@ -5,8 +5,8 @@ import Link from "next/link";
 import BgAnimated from "./(components)/bgAnims";
 import { gsap } from "gsap";
 import { ScrollSmoother } from "gsap/all";
-import DnaIllustration from "./(components)/dnaIllustration";
 import LenisProvider from "./(components)/lenisProvider";
+import StarfieldBackground from "./(components)/bgParticles";
 gsap.registerPlugin(ScrollSmoother);
 
 
@@ -38,14 +38,15 @@ export default function RootLayout({ children }) {
  
 
   return (
-    <html lang="en">
+    <html lang="en" className="overflow-x-hidden overscroll-x-none">
       
       <body
-        className={`antialiased relative overflow-x-hidden`}
+        className={`antialiased relative overflow-x-hidden touch-pan-y`}
       >
         <LenisProvider>
+        <StarfieldBackground />
        <BgAnimated></BgAnimated>
-       <DnaIllustration></DnaIllustration>
+       
 <NavBar></NavBar>
         {children}
         </LenisProvider>
