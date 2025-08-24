@@ -41,7 +41,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className="overflow-x-hidden overscroll-x-none">
       
       <body
-        className={`antialiased relative overflow-x-hidden touch-pan-y`}
+        className={`antialiased relative overflow-x-hidden touch-pan-y touch-pinch-zoom`}
       >
         <LenisProvider>
         <StarfieldBackground />
