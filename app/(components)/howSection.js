@@ -127,9 +127,7 @@ export default function HowSection() {
           <h3>Our process is fully scientific. <br /> And transparent.</h3>
         </div>
         <div id="howFour" className="w-[100vw] flex flex-col justify-center items-center relative">
-        <div className="absolute bottom-[10vh] right-[-5] max-sm:right-0 opacity-70">
-                <Image src="helix-hor.svg" alt="Illustration of a DNA helix" width="300" height="76" className="w-200 max-sm:w-50 h-auto"></Image>
-            </div>
+        
           <span className="max-w-[80vw] flex flex-col justify-start gap-4">
             <h5>THIS IS THE GIST OF THE SCIENCE:</h5>
             <span className="flex flex-row gap-8 max-sm:flex-col">
