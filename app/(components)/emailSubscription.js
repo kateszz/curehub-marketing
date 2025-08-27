@@ -17,11 +17,13 @@ export default function EmailSubscriptionForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isFormActive, setIsFormActive] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Reset states
+    freezeHeroScroll(true); 
     setIsLoading(true);
     setMessage('');
     setIsSuccess(false);
@@ -42,7 +44,7 @@ export default function EmailSubscriptionForm() {
 
       if (response.ok) {
         setIsSuccess(true);
-        setMessage('Successfully subscribed! Please check your email for confirmation. and our free guide on how DNA affects your health!');
+        setMessage('Successfully subscribed! Please check your email for confirmation, and our free guide on how DNA affects your health!');
         setEmail(''); // Clear the form
       } else {
         // Check if it's an "already subscribed" error
@@ -61,6 +63,8 @@ export default function EmailSubscriptionForm() {
       setMessage('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
+      setIsFormActive(false);
+      freezeHeroScroll(false); 
     }
   };
 
@@ -71,12 +75,24 @@ export default function EmailSubscriptionForm() {
           <input
             type="email"
             value={email}
-            onFocus={() => freezeHeroScroll(true)}
-            onBlur={() => freezeHeroScroll(false)}
+            onFocus={() =>   {
+                            setIsFormActive(true);
+                            freezeHeroScroll(true);} 
+                          }
+            onBlur={(e) => {
+                            // Only unfreeze if we're not about to submit
+                            const isClickingButton = e.relatedTarget && 
+                              e.relatedTarget.type === 'submit';
+                            
+                            if (!isClickingButton && !isLoading) {
+                              setIsFormActive(false);
+                              freezeHeroScroll(false);
+                            }
+                          }}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
             placeholder="Your e-mail address"
-            className="flex-1 px-4 py-3 max-sm:px-2 bg-transparent text-white placeholder-gray-300 focus:outline-none disabled:opacity-50"
+            className="flex-1 px-4 py-3 min-w-[20ch] max-sm:px-2 bg-transparent text-white placeholder-gray-300 focus:outline-none disabled:opacity-50"
             required
             disabled={isLoading}
           />
