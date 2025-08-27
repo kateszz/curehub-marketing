@@ -33,6 +33,23 @@ const NavBar = () => {
   );
 };
 
+import { Epilogue, Syne } from 'next/font/google'
+
+const epilogue = Epilogue({
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  style: ['normal', 'italic'],
+  variable: '--font-epilogue',
+  display: 'swap', // Prevents invisible text during font load
+})
+
+const syne = Syne({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-syne', 
+  display: 'swap',
+})
+
 export default function RootLayout({ children }) {
 
  

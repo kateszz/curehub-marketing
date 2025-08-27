@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Syne:wght@400..800&display=swap');
 @import "tailwindcss";
 
 
@@ -112,4 +111,49 @@ html.lenis {
 
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
+}
+
+/* Add these styles to your global CSS or component styles */
+
+/* Prevent viewport jumping during keyboard transitions */
+body.keyboard-open {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Ensure form container stays stable */
+.email-form-container {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for better mobile support */
+}
+
+/* Prevent button from shifting during keyboard events */
+.email-form-button {
+  position: relative;
+  touch-action: manipulation; /* Improve touch responsiveness */
+}
+
+/* Optional: Smooth transitions for better UX */
+.email-form-input,
+.email-form-button {
+  transition: transform 0.15s ease-out;
+}
+
+/* Prevent zoom on input focus on iOS */
+.email-form-input {
+  font-size: 16px; /* Prevents zoom on iOS */
+}
+
+@media (max-width: 768px) {
+  /* Additional mobile-specific fixes */
+  .email-form-container {
+    position: relative;
+    overflow: visible;
+  }
+  
+  /* Ensure button stays clickable */
+  .email-form-button {
+    z-index: 10;
+  }
 }

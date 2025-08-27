@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ScrollTrigger } from 'gsap/all';
 
 function freezeHeroScroll(freeze) {
@@ -18,53 +18,175 @@ export default function EmailSubscriptionForm() {
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [isFormActive, setIsFormActive] = useState(false);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  
+  const inputRef = useRef(null);
+  const buttonRef = useRef(null);
+  const submitTimeoutRef = useRef(null);
+
+  // Detect keyboard open/close for mobile optimization
+  useEffect(() => {
+    const handleViewportChange = () => {
+      if (!window.visualViewport) return;
+      
+      const currentHeight = window.visualViewport.height;
+      const fullHeight = window.screen.height;
+      
+      // Detect if keyboard is likely open (viewport significantly smaller)
+      const keyboardOpen = currentHeight < fullHeight * 0.75;
+      setIsKeyboardOpen(keyboardOpen);
+      
+      // Add/remove body class for CSS targeting
+      document.body.classList.toggle('keyboard-open', keyboardOpen);
+    };
+
+    const handleResize = () => {
+      // Fallback for browsers without visualViewport
+      const currentHeight = window.innerHeight;
+      const fullHeight = window.screen.height;
+      const keyboardOpen = currentHeight < fullHeight * 0.75;
+      setIsKeyboardOpen(keyboardOpen);
+      document.body.classList.toggle('keyboard-open', keyboardOpen);
+    };
+
+    // Use visualViewport if available (better mobile support)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+    } else {
+      window.addEventListener('resize', handleResize);
+    }
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportChange);
+      } else {
+        window.removeEventListener('resize', handleResize);
+      }
+      document.body.classList.remove('keyboard-open');
+      if (submitTimeoutRef.current) {
+        clearTimeout(submitTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    
+    // Clear any pending submit timeouts
+    if (submitTimeoutRef.current) {
+      clearTimeout(submitTimeoutRef.current);
+    }
+    
+    // Immediately blur the input to close keyboard
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+      document.activeElement.blur();
+    }
+    
+    // Keep scroll frozen during submission
+    freezeHeroScroll(true);
     
     // Reset states
-    freezeHeroScroll(true); 
     setIsLoading(true);
     setMessage('');
     setIsSuccess(false);
     
-    try {
-      // Make API call to your backend endpoint
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          email: email.trim().toLowerCase() 
-        }),
-      });
+    // Small delay to ensure smooth keyboard closing
+    const performSubmit = async () => {
+      try {
+        // Make API call to your backend endpoint
+        const response = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            email: email.trim().toLowerCase() 
+          }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (response.ok) {
-        setIsSuccess(true);
-        setMessage('Successfully subscribed! Please check your email for confirmation, and our free guide on how DNA affects your health!');
-        setEmail(''); // Clear the form
-      } else {
-        // Check if it's an "already subscribed" error
-        if (response.status === 400 && data.error && 
-            data.error.toLowerCase().includes('already subscribed')) {
-          setIsSuccess(true); // Show as success (green)
-          setMessage('You have already signed up for our launch!');
+        // Debug logging - remove this after testing
+        console.log('Response status:', response.status);
+        console.log('Response data:', data);
+
+        if (response.ok) {
+          setIsSuccess(true);
+          setMessage('Successfully subscribed! Please check your email for confirmation.');
+          setEmail(''); // Clear the form
         } else {
-          setIsSuccess(false);
-          setMessage(data.error || 'Something went wrong. Please try again.');
+          // Check if it's an "already subscribed" error - more flexible checking
+          if (data.error && (
+            data.error.toLowerCase().includes('already subscribed') ||
+            data.error.toLowerCase().includes('already exists') ||
+            data.error.toLowerCase().includes('already signed up')
+          )) {
+            setIsSuccess(true); // Show as success (green)
+            setMessage('You have already signed up for our launch!');
+          } else {
+            setIsSuccess(false);
+            setMessage(data.error || 'Something went wrong. Please try again.');
+          }
         }
+      } catch (error) {
+        console.error('Subscription error:', error);
+        setIsSuccess(false);
+        setMessage('Network error. Please check your connection and try again.');
+      } finally {
+        setIsLoading(false);
+        // Unfreeze scroll after submission is complete
+        setIsFormActive(false);
+        freezeHeroScroll(false);
       }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      setIsSuccess(false);
-      setMessage('Network error. Please check your connection and try again.');
-    } finally {
-      setIsLoading(false);
-      setIsFormActive(false);
-      freezeHeroScroll(false); 
+    };
+
+    // Add slight delay for smoother UX on mobile
+    submitTimeoutRef.current = setTimeout(performSubmit, isKeyboardOpen ? 150 : 0);
+  };
+
+  const handleButtonTouchStart = (e) => {
+    // Prevent scrolling/jumping when keyboard is open
+    if (isKeyboardOpen && document.activeElement?.tagName === 'INPUT') {
+      e.preventDefault();
+    }
+  };
+
+  const handleButtonClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Prevent double submission
+    if (isLoading) return;
+    
+    handleSubmit();
+  };
+
+  const handleInputFocus = () => {
+    setIsFormActive(true);
+    freezeHeroScroll(true);
+  };
+
+  const handleInputBlur = (e) => {
+    // Only unfreeze if we're not about to submit
+    // Check if the blur is because user clicked the button
+    const isClickingButton = e.relatedTarget && 
+      (e.relatedTarget.type === 'submit' || e.relatedTarget === buttonRef.current);
+    
+    if (!isClickingButton && !isLoading) {
+      // Add small delay to prevent premature unfreezing
+      setTimeout(() => {
+        if (!isLoading) {
+          setIsFormActive(false);
+          freezeHeroScroll(false);
+        }
+      }, 100);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
     }
   };
 
@@ -73,33 +195,25 @@ export default function EmailSubscriptionForm() {
       <div className="relative">
         <div className="flex border-[0px] border-glow-300 bg-glow-200/10 backdrop-blur-sm overflow-visible">
           <input
+            ref={inputRef}
             type="email"
             value={email}
-            onFocus={() =>   {
-                            setIsFormActive(true);
-                            freezeHeroScroll(true);} 
-                          }
-            onBlur={(e) => {
-                            // Only unfreeze if we're not about to submit
-                            const isClickingButton = e.relatedTarget && 
-                              e.relatedTarget.type === 'submit';
-                            
-                            if (!isClickingButton && !isLoading) {
-                              setIsFormActive(false);
-                              freezeHeroScroll(false);
-                            }
-                          }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
             onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
+            onKeyDown={handleKeyDown}
             placeholder="Your e-mail address"
-            className="flex-1 px-4 py-3 min-w-[20ch] max-sm:px-2 bg-transparent text-white placeholder-gray-300 focus:outline-none disabled:opacity-50"
+            className="flex-1 px-4 py-3 max-sm:px-2 bg-transparent text-white placeholder-gray-300 focus:outline-none disabled:opacity-50"
             required
             disabled={isLoading}
           />
           <button
-            onClick={handleSubmit}
+            ref={buttonRef}
+            type="submit"
+            onTouchStart={handleButtonTouchStart}
+            onClick={handleButtonClick}
             disabled={isLoading || !email.trim()}
-            className="px-4 py-3 bg-glow-100/10 hover:bg-dark text-glow-100 font-medium transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-glow-100 focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-3 bg-glow-100/30 hover:bg-dark text-glow-100 font-medium transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-glow-100 focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Signing Up...' : 'Sign Up!'}
           </button>
@@ -107,14 +221,12 @@ export default function EmailSubscriptionForm() {
         
         {/* Status message */}
         {message && (
-          <div className={`mt-3 p-3 rounded-0 ${
+          <div className={`mt-3 p-3 rounded-0 text-sm transition-all duration-300 ${
             isSuccess 
               ? 'bg-green-100/20 text-green-800 border border-green-200' 
               : 'bg-red-100/20 text-red-800 border border-red-200'
           }`}>
-            <p className={` ${ isSuccess ? 'text-green-800' : 'text-red-800' } `}>
             {message}
-            </p>
           </div>
         )}
       </div>
