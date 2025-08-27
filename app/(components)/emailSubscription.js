@@ -1,28 +1,15 @@
 'use client'
 import { useState, useEffect, useRef } from 'react';
-import { ScrollTrigger } from 'gsap/all';
-
-function freezeHeroScroll(freeze) {
-  ScrollTrigger.getAll().forEach(st => {
-    if (st.vars?.id === 'heroscroll') {
-      if (freeze) st.disable(false); // freeze at current state, don't revert
-      else st.enable();
-    }
-  })
-  if (!freeze) ScrollTrigger.refresh(); // re-measure after keyboard closes
-}
 
 export default function EmailSubscriptionForm() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isFormActive, setIsFormActive] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   
   const inputRef = useRef(null);
   const buttonRef = useRef(null);
-  const submitTimeoutRef = useRef(null);
 
   // Detect keyboard open/close for mobile optimization
   useEffect(() => {
@@ -63,27 +50,16 @@ export default function EmailSubscriptionForm() {
         window.removeEventListener('resize', handleResize);
       }
       document.body.classList.remove('keyboard-open');
-      if (submitTimeoutRef.current) {
-        clearTimeout(submitTimeoutRef.current);
-      }
     };
   }, []);
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     
-    // Clear any pending submit timeouts
-    if (submitTimeoutRef.current) {
-      clearTimeout(submitTimeoutRef.current);
-    }
-    
     // Immediately blur the input to close keyboard
     if (document.activeElement && document.activeElement.tagName === 'INPUT') {
       document.activeElement.blur();
     }
-    
-    // Keep scroll frozen during submission
-    freezeHeroScroll(true);
     
     // Reset states
     setIsLoading(true);
@@ -112,7 +88,7 @@ export default function EmailSubscriptionForm() {
 
         if (response.ok) {
           setIsSuccess(true);
-          setMessage('Successfully subscribed! Please check your email for confirmation.');
+          setMessage('Successfully subscribed! Please check your email for our free guide!');
           setEmail(''); // Clear the form
         } else {
           // Check if it's an "already subscribed" error - more flexible checking
@@ -134,14 +110,18 @@ export default function EmailSubscriptionForm() {
         setMessage('Network error. Please check your connection and try again.');
       } finally {
         setIsLoading(false);
-        // Unfreeze scroll after submission is complete
-        setIsFormActive(false);
-        freezeHeroScroll(false);
       }
     };
 
     // Add slight delay for smoother UX on mobile
-    submitTimeoutRef.current = setTimeout(performSubmit, isKeyboardOpen ? 150 : 0);
+    setTimeout(() => {
+      performSubmit();
+      // Also clean up body styles after submission
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.classList.remove('keyboard-open');
+    }, isKeyboardOpen ? 200 : 0);
   };
 
   const handleButtonTouchStart = (e) => {
@@ -162,25 +142,24 @@ export default function EmailSubscriptionForm() {
   };
 
   const handleInputFocus = () => {
-    setIsFormActive(true);
-    freezeHeroScroll(true);
+    // Freeze body scroll while typing AND add keyboard-open class immediately
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.classList.add('keyboard-open');
   };
 
-  const handleInputBlur = (e) => {
-    // Only unfreeze if we're not about to submit
-    // Check if the blur is because user clicked the button
-    const isClickingButton = e.relatedTarget && 
-      (e.relatedTarget.type === 'submit' || e.relatedTarget === buttonRef.current);
-    
-    if (!isClickingButton && !isLoading) {
-      // Add small delay to prevent premature unfreezing
-      setTimeout(() => {
-        if (!isLoading) {
-          setIsFormActive(false);
-          freezeHeroScroll(false);
-        }
-      }, 100);
-    }
+  const handleInputBlur = () => {
+    // Small delay to ensure we don't interfere with button clicks
+    setTimeout(() => {
+      if (!isLoading) {
+        // Re-enable body scroll when done typing and remove keyboard-open class
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.classList.remove('keyboard-open');
+      }
+    }, 200);
   };
 
   const handleKeyDown = (e) => {
